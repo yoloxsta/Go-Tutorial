@@ -5,4 +5,6 @@ import "fmt"
 func main() {
 	var num1 = 10
 	fmt.Println(num1)
+	var num2 = 15
+	fmt.Println(num2)
 }
