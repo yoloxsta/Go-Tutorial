@@ -6,6 +6,18 @@ import (
 	"net/http"
 )
 
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/about" {
+		http.Error(w, "404 not found", http.StatusNotFound)
+		return
+	}
+	if r.Method != "GET" {
+		http.Error(w, "method not supported", http.StatusMethodNotAllowed)
+		return
+	}
+	fmt.Fprintf(w, "This is the About page. Welcome to my Go web server!")
+}
+
 func formHandler(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		fmt.Fprintf(w, "ParseForm() err: %v", err)
@@ -35,6 +47,7 @@ func main() {
 	http.Handle("/", fileServer)
 	http.HandleFunc("/form", formHandler)
 	http.HandleFunc("/hello", helloHandler)
+	http.HandleFunc("/about", aboutHandler)
 
 	fmt.Printf("Starting server at port 8080\n")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
