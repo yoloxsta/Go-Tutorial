@@ -61,6 +61,16 @@ func main() {
 	// Remove Bob from map
 	delete(scores, "Bob")
 
-	fmt.Println("Updated Student List:", students)
+	// Remove Charlie
+	fmt.Println("Removing Charlie...")
+	for i, s := range students {
+		if s == "Charlie" {
+			students = append(students[:i], students[i+1:]...)
+			break
+		}
+	}
+	delete(scores, "Charlie")
+
+	fmt.Println("\nUpdated Student List:", students)
 	fmt.Println("Updated Scores:", scores)
 }
