@@ -9,7 +9,7 @@ func main() {
 
 	// 2. Slice: Dynamic list of students
 	students := []string{}
-	students = append(students, "Alice", "Bob", "Charlie")
+	students = append(students, "Alice", "Bob", "Charlie", "sta")
 	fmt.Println("\nStudent List:", students)
 
 	// 3. Map: Store student scores
@@ -30,6 +30,11 @@ func main() {
 		"Math":    92,
 		"Science": 81,
 		"English": 89,
+	}
+	scores["sta"] = map[string]int{
+		"Math":    90,
+		"Science": 89,
+		"English": 99,
 	}
 
 	// Print all student scores
@@ -61,15 +66,15 @@ func main() {
 	// Remove Bob from map
 	delete(scores, "Bob")
 
-	// Remove Charlie
-	fmt.Println("Removing Charlie...")
+	// Remove Alice
+	fmt.Println("Removing Alice...")
 	for i, s := range students {
-		if s == "Charlie" {
+		if s == "Alice" {
 			students = append(students[:i], students[i+1:]...)
 			break
 		}
 	}
-	delete(scores, "Charlie")
+	delete(scores, "Alice")
 
 	fmt.Println("\nUpdated Student List:", students)
 	fmt.Println("Updated Scores:", scores)
