@@ -71,7 +71,7 @@ func main() {
 	http.HandleFunc("/tasks", tasksHandler)
 
 	fmt.Println("Starting REST API server on http://localhost:8080")
-	// Port 8080 တွင် server ကို စတင် run သည်
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("Could not start server: %s\n", err.Error())
 	}
