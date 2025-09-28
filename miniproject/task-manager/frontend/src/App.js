@@ -60,7 +60,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="header">
-        <h1>✨ Task Manager</h1>
+        <h1>🎨 Graffiti Tasks</h1>
         <p>{totalCount} tasks • {completedCount} done</p>
       </div>
 
@@ -69,20 +69,20 @@ function App() {
           <input
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
-            placeholder="Add a new task..."
+            placeholder="Add a street-art task..."
             onKeyPress={(e) => e.key === 'Enter' && addTask()}
           />
           <button onClick={addTask}>Add</button>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '1rem' }}>
+          <div style={{ textAlign: 'center', padding: '1.5rem' }}>
             <div className="spinner"></div>
           </div>
         ) : tasks.length === 0 ? (
           <div className="empty-state">
-            <div className="emoji">✅</div>
-            <p>No tasks yet! Add your first one.</p>
+            <div className="emoji">🖌️</div>
+            <p>No tags yet! Add your first task.</p>
           </div>
         ) : (
           tasks.map(task => (
