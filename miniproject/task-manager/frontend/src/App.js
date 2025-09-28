@@ -1,7 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './App.css'; // Optional: you can delete App.css if not used
 
 function App() {
   const [tasks, setTasks] = useState([]);
