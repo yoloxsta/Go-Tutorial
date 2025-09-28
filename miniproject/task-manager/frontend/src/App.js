@@ -60,7 +60,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="header">
-        <h1>🎨 Graffiti Tasks</h1>
+        <h1>✏️ Cartoon Tasks</h1>
         <p>{totalCount} tasks • {completedCount} done</p>
       </div>
 
@@ -69,7 +69,7 @@ function App() {
           <input
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
-            placeholder="Add a street-art task..."
+            placeholder="Draw a new task..."
             onKeyPress={(e) => e.key === 'Enter' && addTask()}
           />
           <button onClick={addTask}>Add</button>
@@ -81,8 +81,8 @@ function App() {
           </div>
         ) : tasks.length === 0 ? (
           <div className="empty-state">
-            <div className="emoji">🖌️</div>
-            <p>No tags yet! Add your first task.</p>
+            <span className="emoji">🖍️</span>
+            <p>Canvas is empty! Add your first task.</p>
           </div>
         ) : (
           tasks.map(task => (
