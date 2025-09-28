@@ -7,23 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Task model
+// Task model with Day field
 type Task struct {
 	ID   int    `json:"id"`
 	Text string `json:"text"`
 	Done bool   `json:"done"`
+	Day  string `json:"day"` // monday, tuesday, etc.
 }
 
 var tasks = []Task{
-	{ID: 1, Text: "Learn Go", Done: false},
-	{ID: 2, Text: "Build React frontend", Done: false},
+	{ID: 1, Text: "Learn Go", Done: false, Day: "monday"},
+	{ID: 2, Text: "Build React frontend", Done: false, Day: "tuesday"},
 }
 var nextID = 3
 
 func main() {
 	r := gin.Default()
 
-	// CORS middleware (for React dev server)
+	// CORS middleware (KEEP THIS FOR DOCKER)
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -41,7 +42,7 @@ func main() {
 	r.PUT("/tasks/:id", updateTask)
 	r.DELETE("/tasks/:id", deleteTask)
 
-	r.Run(":8080") // http://localhost:8080
+	r.Run(":8080")
 }
 
 func getTasks(c *gin.Context) {
@@ -71,6 +72,7 @@ func updateTask(c *gin.Context) {
 			}
 			tasks[i].Text = updated.Text
 			tasks[i].Done = updated.Done
+			tasks[i].Day = updated.Day // Preserve day assignment
 			c.JSON(http.StatusOK, tasks[i])
 			return
 		}
