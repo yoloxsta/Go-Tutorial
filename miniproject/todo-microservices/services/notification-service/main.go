@@ -5,44 +5,99 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/websocket"
 )
 
-type Notification struct {
-	Message string `json:"message"`
+var (
+	clients    = make(map[*websocket.Conn]bool)
+	broadcast  = make(chan string)
+	register   = make(chan *websocket.Conn)
+	unregister = make(chan *websocket.Conn)
+)
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow all origins (for dev only!)
+	},
 }
 
-func enableCORS(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+// WebSocket handler
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("WebSocket upgrade error:", err)
+		return
+	}
+	defer conn.Close()
 
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
+	register <- conn
+	defer func() { unregister <- conn }()
+
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Read error:", err)
+			break
 		}
-		next(w, r)
 	}
 }
 
-func sendNotificationHandler(w http.ResponseWriter, r *http.Request) {
+// HTTP endpoint to trigger notification (called by todo-service)
+func notifyHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Only POST allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var note Notification
-	json.NewDecoder(r.Body).Decode(&note)
+	var msg struct {
+		Message string `json:"message"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&msg); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
-	// In real life: send email, push, etc.
-	log.Printf("📧 Notification sent: %s", note.Message)
+	// Broadcast to all connected WebSocket clients
+	broadcast <- msg.Message
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "sent"})
+	w.Write([]byte(`{"status":"broadcasted"}`))
+}
+
+// Goroutine to manage WebSocket connections
+func manageConnections() {
+	for {
+		select {
+		case conn := <-register:
+			clients[conn] = true
+			log.Printf("Client connected. Total: %d", len(clients))
+		case conn := <-unregister:
+			if _, ok := clients[conn]; ok {
+				delete(clients, conn)
+				log.Printf("Client disconnected. Total: %d", len(clients))
+			}
+		case message := <-broadcast:
+			log.Println("Broadcasting:", message)
+			for conn := range clients {
+				if err := conn.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
+					log.Println("Write error:", err)
+					unregister <- conn
+				}
+			}
+		}
+	}
 }
 
 func main() {
-	http.HandleFunc("/notify", enableCORS(sendNotificationHandler))
+	// Start WebSocket manager
+	go manageConnections()
+
+	// Routes
+	http.HandleFunc("/ws", wsHandler)         // WebSocket endpoint
+	http.HandleFunc("/notify", notifyHandler) // HTTP trigger
+
 	log.Println("Notification service running on :8083")
 	log.Fatal(http.ListenAndServe(":8083", nil))
 }

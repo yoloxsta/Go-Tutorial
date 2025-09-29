@@ -51,11 +51,9 @@ func sendNotification(message string) {
 		return
 	}
 	defer resp.Body.Close()
-	log.Println("Notification service responded:", resp.Status)
 }
 
 func todoHandler(w http.ResponseWriter, r *http.Request) {
-	// Handle /todos (GET, POST)
 	if r.URL.Path == "/todos" {
 		switch r.Method {
 		case http.MethodGet:
@@ -75,7 +73,6 @@ func todoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle /todos/{id} (PUT, DELETE)
 	if len(r.URL.Path) > 7 && r.URL.Path[:7] == "/todos/" {
 		idStr := r.URL.Path[7:]
 		id, err := strconv.Atoi(idStr)
@@ -84,7 +81,6 @@ func todoHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Find todo index
 		var idx int = -1
 		for i, t := range todos {
 			if t.ID == id {
@@ -101,7 +97,7 @@ func todoHandler(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPut:
 			var updated Todo
 			json.NewDecoder(r.Body).Decode(&updated)
-			updated.ID = id // preserve ID
+			updated.ID = id
 			todos[idx] = updated
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(updated)
@@ -119,7 +115,7 @@ func todoHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/todos", enableCORS(todoHandler))
-	http.HandleFunc("/todos/", enableCORS(todoHandler)) // catches /todos/1, etc.
+	http.HandleFunc("/todos/", enableCORS(todoHandler))
 	log.Println("Todo service running on :8082")
 	log.Fatal(http.ListenAndServe(":8082", nil))
 }
